@@ -40,7 +40,7 @@ Karena Colab berjalan di *cloud*, kita butuh kunci Ngrok (`NGROK_AUTHTOKEN`) aga
 
 ## 🔌 Langkah 2: Instalasi Plugin QGIS
 
-1. Unduh (Download) file `S2DR4_Connector_Official.zip` dari repositori ini.
+1. Unduh (Download) file [S2DR4_Connector_Official.zip](https://github.com/ahzastudio/s2dr4-qgis-connector/releases/download/v1.0.0/S2DR4_Connector_Official.zip).
 2. Buka **QGIS**.
 3. Pergi ke Menu **Plugins** > **Manage and Install Plugins...**
 4. Pilih tab **Install from ZIP** (di sebelah kiri).
