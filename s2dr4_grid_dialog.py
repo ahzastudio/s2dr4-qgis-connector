@@ -121,24 +121,23 @@ class S2DR4GridDialog(QDialog):
             
             # We add padding to ensure edges are covered
             x = x_min + (tile_size / 2)
-            y_start = y_min + (tile_size / 2)
-            
             features_to_add = []
             point_id = 1
             
             # We cover slightly beyond the max to avoid gaps
+            # Optimize: Buffer the combined AOI geometry ONCE instead of buffering every point
+            # This increases the generation speed by orders of magnitude for complex polygons
+            buffered_aoi = combined_geom.buffer(tile_size / 2, 5)
+            
             current_x = x_min
-            while current_x <= x_max + (tile_size/2):
+            while current_x <= x_max + (tile_size / 2):
                 current_y = y_min
-                while current_y <= y_max + (tile_size/2):
+                while current_y <= y_max + (tile_size / 2):
                     # Point geometry in Metric
                     pt_geom_metric = QgsGeometry.fromPointXY(QgsPointXY(current_x, current_y))
                     
-                    # Buffer the point to represent the tile coverage (square or circle approximation)
-                    buffer_geom = pt_geom_metric.buffer(tile_size / 2, 5)
-                    
-                    # If the tile buffer intersects the AOI polygon, keep this centroid
-                    if buffer_geom.intersects(combined_geom):
+                    # If the point falls within the buffered AOI, keep this centroid
+                    if pt_geom_metric.intersects(buffered_aoi):
                         # Transform point to EPSG:4326 for S2DR4 compatibility
                         pt_geom_out = QgsGeometry(pt_geom_metric)
                         pt_geom_out.transform(transform_to_out)
