@@ -242,9 +242,11 @@ class SupabaseGuard:
                 try:
                     hostname = platform.node()
                     username = getpass.getuser()
-                    auto_client = "{} ({}) [QGIS]".format(hostname, username)
+                    suffix = "[ArcPro]" if "arcgis pro" in app_name.lower() else ("[ArcMap]" if "arcmap" in app_name.lower() else "[QGIS]")
+                    auto_client = "{} ({}) {}".format(hostname, username, suffix)
                 except Exception:
-                    auto_client = "Unknown PC [QGIS]"
+                    suffix = "[ArcPro]" if "arcgis pro" in app_name.lower() else ("[ArcMap]" if "arcmap" in app_name.lower() else "[QGIS]")
+                    auto_client = "Unknown PC {}".format(suffix)
 
                 payload = {
                     "machine_id": machine_id,
@@ -295,9 +297,11 @@ class SupabaseGuard:
                     try:
                         hostname = platform.node()
                         username = getpass.getuser()
-                        auto_client = "{} ({}) [QGIS]".format(hostname, username)
+                        suffix = "[ArcPro]" if "arcgis pro" in app_name.lower() else ("[ArcMap]" if "arcmap" in app_name.lower() else "[QGIS]")
+                        auto_client = "{} ({}) {}".format(hostname, username, suffix)
                     except:
-                        auto_client = "Unknown PC [QGIS]"
+                        suffix = "[ArcPro]" if "arcgis pro" in app_name.lower() else ("[ArcMap]" if "arcmap" in app_name.lower() else "[QGIS]")
+                        auto_client = "Unknown PC {}".format(suffix)
 
                     SupabaseGuard.make_request(url_upd, "PATCH", {
                         "last_check": datetime.now(timezone.utc).isoformat(),
