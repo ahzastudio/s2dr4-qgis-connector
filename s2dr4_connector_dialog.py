@@ -70,7 +70,9 @@ class S2DR4Worker(QThread):
                         if 'content-disposition' in response.headers:
                             cd = response.headers['content-disposition']
                             if 'filename=' in cd:
-                                filename = cd.split('filename=')[1].strip('"')
+                                original = cd.split('filename=')[1].strip('"')
+                                name_part, ext = os.path.splitext(original)
+                                filename = f"{name_part}_lon{lon:.4f}_lat{lat:.4f}{ext}"
                         
                         out_path = os.path.join(self.output_dir, filename)
                         with open(out_path, 'wb') as f:
