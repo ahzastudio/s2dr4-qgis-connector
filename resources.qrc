@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/s2dr4_connector_official" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>

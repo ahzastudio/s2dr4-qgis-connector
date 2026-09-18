@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>S2DR4ConnectorDialogBase</class>
+ <widget class="QDialog" name="S2DR4ConnectorDialogBase">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>S2DR4 Gamma Earth Connector</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label_url">
+     <property name="text">
+      <string>Ngrok API URL (dari Colab):</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="input_url">
+     <property name="placeholderText">
+      <string>https://xxxx-xxx-xxx.ngrok-free.app</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_date">
+     <property name="text">
+      <string>Tanggal Akuisisi Sentinel-2 (YYYY-MM-DD):</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="input_date">
+     <property name="placeholderText">
+      <string>2025-07-20</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_layer">
+     <property name="text">
+      <string>Pilih Layer Titik (Point Shapefile/Grid):</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="combo_layer"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_outdir">
+     <property name="text">
+      <string>Folder Output TIF:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLineEdit" name="input_outdir">
+       <property name="placeholderText">
+        <string>Pilih folder penyimpanan .tif...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_browse">
+       <property name="text">
+        <string>Browse...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="lbl_status">
+     <property name="text">
+      <string>Status: Siap.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progress_bar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="btn_process">
+       <property name="text">
+        <string>Jalankan S2DR4</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_cancel">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Batal</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,13 @@
+[general]
+name=S2DR4 Connector
+qgisMinimumVersion=3.0
+description=Client plugin to connect QGIS with Gamma Earth S2DR4 Super-Resolution API running on Google Colab.
+version=1.0
+author=AhzaStudio x CAT Spatial Specialist
+email=support@ahzastudio.com
+about=This plugin iterates through a selected Point vector layer, sends coordinates to a Colab Ngrok API, and automatically loads the resulting 10m Super-Resolution Multi-Spectral TIFs back into the QGIS canvas.
+tracker=https://github.com/gamayos/gamma-earth-api/issues
+repository=https://github.com/gamayos/gamma-earth-api
+category=Raster
+icon=icon.svg
+tags=s2dr4, sentinel-2, super-resolution, raster, api
