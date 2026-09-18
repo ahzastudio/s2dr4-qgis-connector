@@ -2,42 +2,29 @@
 
 S2DR4 Connector adalah *plugin* QGIS dan *Python Toolbox* ArcGIS yang menghubungkan *software* pemetaan desktop-mu dengan kekuatan Super-Komputer Google Colab. Alat ini memungkinkan pengguna untuk mendownload citra satelit **Sentinel-2** yang telah dipertajam menjadi resolusi **10 meter** menggunakan algoritma *Deep Learning* S2DR4 (Super-Resolusi) secara langsung ke dalam kanvas petamu.
 
-Arsitektur sistem ini didesain menggunakan **Ngrok** dan **FastAPI** agar proses AI yang berat dapat berjalan di *cloud* secara gratis (melalui GPU Google Colab), sementara hasilnya langsung mengalir ke *harddisk* komputermu tanpa membebani penyimpanan Google Drive.
+Arsitektur sistem ini didesain menggunakan **Cloudflare Tunnel** dan **FastAPI** agar proses AI yang berat dapat berjalan di *cloud* secara gratis (melalui GPU Google Colab), sementara hasilnya langsung mengalir ke *harddisk* komputermu tanpa membebani penyimpanan Google Drive.
 
 ---
 
 ## 📋 Prasyarat Sistem
-Sebelum memulai, pastikan kamu memiliki tiga hal ini:
+Sebelum memulai, pastikan kamu memiliki dua hal ini:
 1. **Google Colab (Gratis):** Membutuhkan Akun Google biasa.
-2. **Ngrok (Gratis):** Platform untuk menghubungkan Colab dengan komputermu. Membutuhkan akun Ngrok gratis.
-3. **QGIS Desktop:** Versi 3.x ke atas.
+2. **QGIS Desktop / ArcGIS:** (Tidak perlu mendaftar tunnel, koneksi di-*routing* gratis lewat Cloudflare).
 
 ---
 
 ## 🚀 Langkah 1: Setup API Server (Google Colab)
 
-Karena Colab berjalan di *cloud*, kita butuh kunci Ngrok (`NGROK_AUTHTOKEN`) agar Colab bisa berkomunikasi dengan komputermu dengan aman. **Ingat, token ini bersifat pribadi untuk setiap pengguna.**
+Karena Colab berjalan di *cloud*, kita butuh *tunnel* (terowongan) agar Colab bisa berkomunikasi dengan komputermu secara jarak jauh. Sistem ini menggunakan **Cloudflare Tunnel** yang 100% gratis, bebas limit bandwidth, dan tidak membutuhkan pendaftaran/login akun.
 
-1. **Dapatkan Token Ngrok-mu:**
-   - Buka [Ngrok.com](https://ngrok.com/) dan buat akun (Sign Up) secara gratis.
-   - Setelah *login*, masuk ke menu **Tunnels** > **Auth Token** di panel sebelah kiri.
-   - *Copy* / salin token tersebut (kombinasi huruf dan angka panjang).
-
-![Cara memasukkan Ngrok Token di Colab Secrets](images/colab_secrets.png)
-
-2. **Pasang Token di Colab Secrets:**
-   - Buka file `S2DR4_QGIS_SERVER.ipynb` di dalam Google Colab.
-   - Klik ikon **Kunci (Secrets)** di menu navigasi paling kiri layar Colab.
-   - Klik **+ Add new secret**.
-   - Pada kolom *Name*, ketik: `NGROK_AUTHTOKEN` (huruf besar semua).
-   - Pada kolom *Value*, *paste* token Ngrok milikmu tadi.
-   - Nyalakan tombol *toggle* agar statusnya aktif (berwarna biru).
-3. **Jalankan Server:**
-   - Di Colab, klik menu **Runtime** di atas layar, lalu pilih **Run All**.
-   - Tunggu sekitar 2-3 menit untuk proses instalasi sistem.
-   - *Scroll* ke sel paling bawah. Jika berhasil, akan muncul tulisan:
-     `[OK] API Server Berjalan di: https://xxxx.ngrok-free.dev`
-   - Salin URL tersebut, biarkan Colab tetap terbuka di *browser*-mu.
+1. **Jalankan Notebook:**
+   - Buka/upload file `S2DR4_QGIS_SERVER.ipynb` ke dalam Google Colab.
+2. **Nyalakan Server:**
+   - Di menu navigasi atas Colab, klik **Runtime** > **Run All**.
+   - Tunggu sekitar 2-3 menit untuk proses persiapan & instalasi.
+   - *Scroll* perlahan ke sel paling bawah. Jika berhasil, akan ada notifikasi:
+     `[OK] API Server Berjalan di: https://xxxx.trycloudflare.com`
+   - Salin (Copy) URL tersebut. **Biarkan halaman Colab tetap terbuka** selama kamu menggunakan plugin di GIS.
 
 ---
 
@@ -84,7 +71,7 @@ Jika kamu memiliki area batas/AOI (*Polygon*) yang luas dan ingin mengisinya den
 
 1. Pastikan *layer* titik (*Point*) hasil grid tadi (atau titik manapun) sedang **aktif** di panel *Layers* QGIS.
 2. Klik tombol **S2DR4 Connector** (Ikon Satelit Hijau).
-3. Paste **URL Ngrok** yang kamu dapat dari sel terakhir Colab.
+3. Paste **URL Cloudflare** yang kamu dapat dari sel terakhir Colab.
 4. Masukkan **Tanggal Akuisisi** (format YYYY-MM-DD, contoh: `2025-08-17`).
 5. Pilih titik layer *Point* dan tentukan **Folder Output** TIF di komputermu.
 6. Klik **Jalankan S2DR4**.
@@ -100,8 +87,8 @@ S2DR4 memiliki algoritma pelindung awan otomatis (*Fallback*). Jika di lokasi da
 **2. Kenapa Colab Error `RuntimeError: asyncio.run() cannot be called...`?**
 Jika kamu memodifikasi kode peluncuran FastAPI, pastikan kamu selalu menggunakan metode `await server.serve()` karena *environment* Jupyter Notebook sudah berjalan di dalam *loop Asyncio*.
 
-**3. Ngrok Error 502 / Connection Refused?**
-Pastikan tab Colab-mu masih menyala (aktif). Colab gratis akan mati jika dibiarkan tanpa aktivitas terlalu lama, yang menyebabkan server Ngrok putus.
+**3. API Error 502 / Connection Refused?**
+Pastikan tab Colab-mu masih menyala (aktif). Colab gratis akan mati jika dibiarkan tanpa aktivitas terlalu lama, yang menyebabkan server Cloudflare putus.
 
 ---
 *Dibuat khusus untuk penggiat geospasial.* 🛰️🌍
