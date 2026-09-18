@@ -51,6 +51,18 @@ Karena Colab berjalan di *cloud*, kita butuh kunci Ngrok (`NGROK_AUTHTOKEN`) aga
 6. Klik **Install Plugin**.
 7. Akan muncul dua alat baru berbentuk ikon Satelit dan Kotak Grid di Toolbar QGIS-mu.
 
+## 🔌 Langkah 2B: Instalasi untuk ArcGIS Pro & ArcMap
+
+Jika kamu pengguna ekosistem ESRI, kamu tidak perlu menginstal apa pun. Cukup unduh Toolbox berikut:
+- [S2DR4_Connector_ArcGISPro.pyt](https://github.com/ahzastudio/s2dr4-qgis-connector/releases/download/v1.0.0/S2DR4_Connector_ArcGISPro.pyt) (Untuk ArcGIS Pro)
+- [S2DR4_Connector_ArcMap.pyt](https://github.com/ahzastudio/s2dr4-qgis-connector/releases/download/v1.0.0/S2DR4_Connector_ArcMap.pyt) (Untuk ArcMap)
+
+Cara Penggunaan:
+1. Simpan file `.pyt` tersebut di komputer.
+2. Buka panel **Catalog** di ArcGIS Pro / ArcMap.
+3. Hubungkan (*Connect to Folder*) ke tempat kamu menyimpan `.pyt` tersebut.
+4. Buka panah di sebelah file `.pyt` untuk mengakses *S2DR4 Grid Generator* dan *S2DR4 Downloader*.
+
 ---
 
 ## 🛠 Langkah 3: Panduan Penggunaan
