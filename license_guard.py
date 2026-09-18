@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -34,7 +34,7 @@ class SupabaseGuard:
     # KONTAK ADMIN
     ADMIN_NAME = "Ardi Abu Ridho"
     ADMIN_WA = "+62 822-5476-0769"
-    VERSION = "4.0.3"
+    VERSION = "1.0.0"
 
     @staticmethod
     def get_machine_id():
@@ -407,3 +407,4 @@ class SupabaseGuard:
 
         except Exception as e:
             return False, "License Logic Error: {}".format(str(e)), {}
+
