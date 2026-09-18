@@ -54,6 +54,9 @@ Karena Colab berjalan di *cloud*, kita butuh kunci Ngrok (`NGROK_AUTHTOKEN`) aga
 
 ### A. Memotong Area menjadi Grid (S2DR4 Grid Generator)
 Jika kamu memiliki area batas/AOI (*Polygon*) yang luas dan ingin mengisinya dengan citra satelit tanpa celah:
+
+![S2DR4 Grid Generator GUI](images/grid_generator_gui.png)
+
 1. Klik tombol **S2DR4 Grid Generator** (Ikon Kotak Biru).
 2. Pilih layer Polygon AOI-mu. (Pastikan menggunakan koordinat meter/UTM).
 3. Biarkan ukuran TIF `4000` meter.
@@ -61,6 +64,9 @@ Jika kamu memiliki area batas/AOI (*Polygon*) yang luas dan ingin mengisinya den
 5. Klik **Buat Grid Titik**. Sebuah layer titik pusat (*centroid*) EPSG:4326 akan muncul di petamu.
 
 ### B. Mendownload Citra AI (S2DR4 Connector)
+
+![S2DR4 Connector GUI](images/connector_gui.png)
+
 1. Pastikan *layer* titik (*Point*) hasil grid tadi (atau titik manapun) sedang **aktif** di panel *Layers* QGIS.
 2. Klik tombol **S2DR4 Connector** (Ikon Satelit Hijau).
 3. Paste **URL Ngrok** yang kamu dapat dari sel terakhir Colab.
