@@ -22,6 +22,9 @@ Karena Colab berjalan di *cloud*, kita butuh kunci Ngrok (`NGROK_AUTHTOKEN`) aga
    - Buka [Ngrok.com](https://ngrok.com/) dan buat akun (Sign Up) secara gratis.
    - Setelah *login*, masuk ke menu **Tunnels** > **Auth Token** di panel sebelah kiri.
    - *Copy* / salin token tersebut (kombinasi huruf dan angka panjang).
+
+![Cara memasukkan Ngrok Token di Colab Secrets](images/colab_secrets.png)
+
 2. **Pasang Token di Colab Secrets:**
    - Buka file `S2DR4_QGIS_SERVER.ipynb` di dalam Google Colab.
    - Klik ikon **Kunci (Secrets)** di menu navigasi paling kiri layar Colab.
