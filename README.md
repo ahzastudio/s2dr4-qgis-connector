@@ -1,6 +1,6 @@
 # S2DR4 Gamma Earth Connector untuk QGIS
 
-S2DR4 Connector adalah *plugin* QGIS yang menghubungkan QGIS Desktop dengan kekuatan Super-Komputer Google Colab. *Plugin* ini memungkinkan pengguna untuk mendownload citra satelit **Sentinel-2** yang telah dipertajam menjadi resolusi **10 meter** menggunakan algoritma *Deep Learning* S2DR4 (Super-Resolusi) secara langsung ke dalam kanvas peta QGIS.
+S2DR4 Connector adalah *plugin* QGIS dan *Python Toolbox* ArcGIS yang menghubungkan *software* pemetaan desktop-mu dengan kekuatan Super-Komputer Google Colab. Alat ini memungkinkan pengguna untuk mendownload citra satelit **Sentinel-2** yang telah dipertajam menjadi resolusi **10 meter** menggunakan algoritma *Deep Learning* S2DR4 (Super-Resolusi) secara langsung ke dalam kanvas petamu.
 
 Arsitektur sistem ini didesain menggunakan **Ngrok** dan **FastAPI** agar proses AI yang berat dapat berjalan di *cloud* secara gratis (melalui GPU Google Colab), sementara hasilnya langsung mengalir ke *harddisk* komputermu tanpa membebani penyimpanan Google Drive.
 

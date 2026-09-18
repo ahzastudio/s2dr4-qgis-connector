@@ -1,11 +1,12 @@
 import os.path
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
 # Initialize Qt resources from file resources.py
 import S2DR4_Connector_Official.resources
 from .s2dr4_connector_dialog import S2DR4ConnectorDialog
 from .s2dr4_grid_dialog import S2DR4GridDialog
+from .license_guard import SupabaseGuard
 
 class S2DR4Connector:
     """QGIS Plugin Implementation."""
@@ -84,6 +85,11 @@ class S2DR4Connector:
 
     def run(self):
         """Run method that performs all the real work"""
+        valid, msg, info = SupabaseGuard.check_license(app_name="S2DR4 Connector QGIS", minimum_tier="free", show_machine_id=True)
+        if not valid:
+            QMessageBox.critical(self.iface.mainWindow(), "Akses Ditolak", msg)
+            return
+            
         if self.first_start == True:
             self.first_start = False
             self.dialog = S2DR4ConnectorDialog(self.iface.mainWindow())
@@ -95,6 +101,11 @@ class S2DR4Connector:
 
     def run_grid(self):
         """Run the grid generator"""
+        valid, msg, info = SupabaseGuard.check_license(app_name="S2DR4 Connector QGIS", minimum_tier="free", show_machine_id=True)
+        if not valid:
+            QMessageBox.critical(self.iface.mainWindow(), "Akses Ditolak", msg)
+            return
+            
         if self.first_start_grid == True:
             self.first_start_grid = False
             self.grid_dialog = S2DR4GridDialog(self.iface.mainWindow())
