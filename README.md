@@ -10,6 +10,18 @@ Arsitektur sistem ini didesain menggunakan **Cloudflare Tunnel** dan **FastAPI**
 Sebelum memulai, pastikan kamu memiliki dua hal ini:
 1. **Google Colab (Gratis):** Membutuhkan Akun Google biasa.
 2. **QGIS Desktop / ArcGIS:** (Tidak perlu mendaftar tunnel, koneksi di-*routing* gratis lewat Cloudflare).
+3. **Akun Gamma Earth:** Untuk mendapatkan API Key.
+
+---
+
+## 🔑 Langkah 0: Dapatkan API Key Gamma Earth
+
+Sistem S2DR4 membutuhkan API Key gratis dari Gamma Earth untuk mendownload citra satelit (kuota 20 scene per akun).
+1. Buka [Gamma Earth Dashboard](https://app.gamma.earth/dashboard) dan daftar/login.
+2. Dapatkan API Key kamu di dashboard.
+3. Buka **Google Colab** > klik menu **Secrets** (ikon Kunci di bilah kiri).
+4. Tambahkan *secret* baru dengan nama `GAMMA_EARTH_API_KEY` (atau sesuai petunjuk panduan Gamma Earth) dan masukkan API Key kamu sebagai *value*-nya, lalu nyalakan tombol *toggle* akses ke notebook.
+5. Panduan visual lengkap: [Connect Google Colab Account](https://demo.gamma.earth/knowledge-base/connect-google-colab-account.html)
 
 ---
 

@@ -19,12 +19,13 @@ class S2DR4Worker(QThread):
     feature_done = pyqtSignal(str, str) # title, file_path
     finished = pyqtSignal(bool, str) # success, message
     
-    def __init__(self, api_url, date_str, layer, output_dir):
+    def __init__(self, api_url, date_str, layer, output_dir, band="MS"):
         super().__init__()
         self.api_url = api_url.rstrip('/')
         self.date_str = date_str
         self.layer = layer
         self.output_dir = output_dir
+        self.band = band
         self.is_running = True
 
     def run(self):
@@ -62,25 +63,62 @@ class S2DR4Worker(QThread):
                 }
                 
                 try:
-                    self.progress_update.emit(int((i / total) * 100), f"Menunggu Colab memproses Titik {i+1} (Bisa memakan waktu 3-5 menit)...")
-                    response = requests.post(endpoint, json=payload, timeout=600)
+                    self.progress_update.emit(int((i / total) * 100), f"Mengirim antrean ke Colab AI (Titik {i+1})...")
+                    response = requests.post(endpoint, json=payload, timeout=60)
                     
                     if response.status_code == 200:
-                        filename = f"S2L3Ax10_{self.date_str.replace('-','')}_{lon:.4f}_{lat:.4f}_MS.tif"
-                        if 'content-disposition' in response.headers:
-                            cd = response.headers['content-disposition']
-                            if 'filename=' in cd:
-                                original = cd.split('filename=')[1].strip('"')
-                                name_part, ext = os.path.splitext(original)
-                                filename = f"{name_part}_lon{lon:.4f}_lat{lat:.4f}{ext}"
+                        resp_data = response.json()
+                        job_id = resp_data.get("job_id")
+                        status_url = f"{self.api_url}/status/{job_id}"
+                        download_url = f"{self.api_url}/download/{job_id}?band={self.band}"
                         
-                        out_path = os.path.join(self.output_dir, filename)
-                        with open(out_path, 'wb') as f:
-                            f.write(response.content)
+                        is_done = False
+                        error_msg = ""
+                        while not is_done and self.is_running:
+                            time.sleep(5)
+                            s_resp = requests.get(status_url, timeout=30)
+                            if s_resp.status_code == 200:
+                                s_data = s_resp.json()
+                                status = s_data.get("status")
+                                if status == "completed":
+                                    is_done = True
+                                elif status == "error":
+                                    is_done = True
+                                    error_msg = s_data.get("error", "Unknown error")
+                                else:
+                                    self.progress_update.emit(int((i / total) * 100), f"Colab sedang memproses Titik {i+1}... (Estimasi 3-5 menit)")
+                                    
+                        if error_msg:
+                            QgsMessageLog.logMessage(f"Titik {i+1} AI Error: {error_msg}", 'S2DR4', Qgis.Warning)
+                            continue
+                            
+                        if not self.is_running:
+                            break
+                            
+                        self.progress_update.emit(int((i / total) * 100), f"Titik {i+1} selesai. Mengunduh hasil ({self.band})...")
                         
-                        self.feature_done.emit(filename, out_path)
+                        # Streaming download
+                        dl_resp = requests.get(download_url, stream=True, timeout=600)
+                        if dl_resp.status_code == 200:
+                            filename = f"S2L3Ax10_{self.date_str.replace('-','')}_{lon:.4f}_{lat:.4f}_{self.band}.tif"
+                            if 'content-disposition' in dl_resp.headers:
+                                cd = dl_resp.headers['content-disposition']
+                                if 'filename=' in cd:
+                                    original = cd.split('filename=')[1].strip('"')
+                                    name_part, ext = os.path.splitext(original)
+                                    filename = f"{name_part}_lon{lon:.4f}_lat{lat:.4f}{ext}"
+                            
+                            out_path = os.path.join(self.output_dir, filename)
+                            with open(out_path, 'wb') as f:
+                                for chunk in dl_resp.iter_content(chunk_size=1024*1024):
+                                    if chunk:
+                                        f.write(chunk)
+                            
+                            self.feature_done.emit(filename, out_path)
+                        else:
+                            QgsMessageLog.logMessage(f"Titik {i+1} Gagal Download. Kode: {dl_resp.status_code}", 'S2DR4', Qgis.Warning)
                     else:
-                        QgsMessageLog.logMessage(f"Titik {i+1} Gagal. Kode: {response.status_code}, Respon: {response.text}", 'S2DR4', Qgis.Warning)
+                        QgsMessageLog.logMessage(f"Titik {i+1} Gagal Antre. Kode: {response.status_code}", 'S2DR4', Qgis.Warning)
                 except Exception as e:
                     QgsMessageLog.logMessage(f"Request Error Titik {i+1}: {str(e)}", 'S2DR4', Qgis.Critical)
             
@@ -126,6 +164,15 @@ class S2DR4ConnectorDialog(QDialog, FORM_CLASS):
         out_dir = self.input_outdir.text().strip()
         layer_id = self.combo_layer.currentData()
         
+        band_selection = self.combo_band.currentText()
+        band = "TCI"
+        if "MS" in band_selection:
+            band = "MS"
+        elif "NDVI" in band_selection:
+            band = "NDVI"
+        elif "IRP" in band_selection:
+            band = "IRP"
+        
         if not api_url or not date_str or not out_dir or not layer_id:
             QMessageBox.warning(self, "Peringatan", "Semua kolom harus diisi!")
             return
@@ -138,8 +185,9 @@ class S2DR4ConnectorDialog(QDialog, FORM_CLASS):
         self.btn_process.setEnabled(False)
         self.btn_cancel.setEnabled(True)
         self.progress_bar.setValue(0)
+        self.lbl_status.setText("Status: Menghubungi server Colab...")
         
-        self.worker = S2DR4Worker(api_url, date_str, layer, out_dir)
+        self.worker = S2DR4Worker(api_url, date_str, layer, out_dir, band)
         self.worker.progress_update.connect(self.on_progress)
         self.worker.feature_done.connect(self.on_feature_done)
         self.worker.finished.connect(self.on_finished)
