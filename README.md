@@ -21,6 +21,9 @@ Sistem S2DR4 membutuhkan API Key gratis dari Gamma Earth untuk mendownload citra
 2. Dapatkan API Key kamu di dashboard.
 3. Buka **Google Colab** > klik menu **Secrets** (ikon Kunci di bilah kiri).
 4. Tambahkan *secret* baru dengan nama `GE_API_KEY` dan masukkan API Key kamu sebagai *value*-nya, lalu nyalakan tombol *toggle* akses ke notebook.
+   
+   ![Setup Colab Secrets](images/colab_secrets.png)
+   
 5. Panduan visual lengkap: [Connect Google Colab Account](https://demo.gamma.earth/knowledge-base/connect-google-colab-account.html)
 
 ---
