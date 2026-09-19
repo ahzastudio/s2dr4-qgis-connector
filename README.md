@@ -33,7 +33,8 @@ Sistem S2DR4 membutuhkan API Key gratis dari Gamma Earth untuk mendownload citra
 Karena Colab berjalan di *cloud*, kita butuh *tunnel* (terowongan) agar Colab bisa berkomunikasi dengan komputermu secara jarak jauh. Sistem ini menggunakan **Cloudflare Tunnel** yang 100% gratis, bebas limit bandwidth, dan tidak membutuhkan pendaftaran/login akun.
 
 1. **Jalankan Notebook:**
-   - Buka/upload file `S2DR4_QGIS_SERVER.ipynb` ke dalam Google Colab.
+   - Unduh file notebook berikut: [S2DR4_QGIS_SERVER.ipynb](https://github.com/ahzastudio/s2dr4-qgis-connector/releases/download/v1.0.0/S2DR4_QGIS_SERVER.ipynb).
+   - Buka dan upload file tersebut ke dalam Google Colab.
 2. **Nyalakan Server:**
    - Di menu navigasi atas Colab, klik **Runtime** > **Run All**.
    - Tunggu sekitar 2-3 menit untuk proses persiapan & instalasi.
