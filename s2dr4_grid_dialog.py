@@ -119,20 +119,39 @@ class S2DR4GridDialog(QDialog):
             x_min, x_max = bbox.xMinimum(), bbox.xMaximum()
             y_min, y_max = bbox.yMinimum(), bbox.yMaximum()
             
-            # We add padding to ensure edges are covered
-            x = x_min + (tile_size / 2)
+            width = x_max - x_min
+            height = y_max - y_min
+            center_x = x_min + (width / 2.0)
+            center_y = y_min + (height / 2.0)
+            
+            import math
+            if width <= tile_size:
+                cols = 1
+            else:
+                cols = int(math.ceil((width - tile_size) / step)) + 1
+                
+            if height <= tile_size:
+                rows = 1
+            else:
+                rows = int(math.ceil((height - tile_size) / step)) + 1
+                
+            grid_width = (cols - 1) * step
+            grid_height = (rows - 1) * step
+            
+            start_x = center_x - (grid_width / 2.0)
+            start_y = center_y - (grid_height / 2.0)
+            
             features_to_add = []
             point_id = 1
             
-            # We cover slightly beyond the max to avoid gaps
             # Optimize: Buffer the combined AOI geometry ONCE instead of buffering every point
-            # This increases the generation speed by orders of magnitude for complex polygons
-            buffered_aoi = combined_geom.buffer(tile_size / 2, 5)
+            buffered_aoi = combined_geom.buffer(tile_size / 2.0, 5)
             
-            current_x = x_min
-            while current_x <= x_max + (tile_size / 2):
-                current_y = y_min
-                while current_y <= y_max + (tile_size / 2):
+            for i in range(cols):
+                current_x = start_x + (i * step)
+                for j in range(rows):
+                    current_y = start_y + (j * step)
+                    
                     # Point geometry in Metric
                     pt_geom_metric = QgsGeometry.fromPointXY(QgsPointXY(current_x, current_y))
                     
@@ -147,9 +166,6 @@ class S2DR4GridDialog(QDialog):
                         feat.setAttributes([point_id, int(tile_size)])
                         features_to_add.append(feat)
                         point_id += 1
-                        
-                    current_y += step
-                current_x += step
                 
             if features_to_add:
                 provider.addFeatures(features_to_add)

@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import requests
 import traceback
@@ -19,7 +20,7 @@ class S2DR4Worker(QThread):
     feature_done = pyqtSignal(str, str) # title, file_path
     finished = pyqtSignal(bool, str) # success, message
     
-    def __init__(self, api_url, date_str, layer, output_dir, band="MS"):
+    def __init__(self, api_url, date_str, layer, output_dir, band="TCI"):
         super().__init__()
         self.api_url = api_url.rstrip('/')
         self.date_str = date_str
@@ -40,6 +41,10 @@ class S2DR4Worker(QThread):
             source_crs = self.layer.crs()
             target_crs = QgsCoordinateReferenceSystem("EPSG:4326")
             transform = QgsCoordinateTransform(source_crs, target_crs, QgsProject.instance())
+
+            success_count = 0
+            failed_count = 0
+            last_error_msg = ""
 
             for i, feat in enumerate(features):
                 if not self.is_running:
@@ -89,6 +94,8 @@ class S2DR4Worker(QThread):
                                     self.progress_update.emit(int((i / total) * 100), f"Colab sedang memproses Titik {i+1}... (Estimasi 3-5 menit)")
                                     
                         if error_msg:
+                            failed_count += 1
+                            last_error_msg = error_msg
                             QgsMessageLog.logMessage(f"Titik {i+1} AI Error: {error_msg}", 'S2DR4', Qgis.Warning)
                             continue
                             
@@ -100,6 +107,7 @@ class S2DR4Worker(QThread):
                         # Streaming download
                         dl_resp = requests.get(download_url, stream=True, timeout=600)
                         if dl_resp.status_code == 200:
+                            content_len = int(dl_resp.headers.get('content-length', 0))
                             filename = f"S2L3Ax10_{self.date_str.replace('-','')}_{lon:.4f}_{lat:.4f}_{self.band}.tif"
                             if 'content-disposition' in dl_resp.headers:
                                 cd = dl_resp.headers['content-disposition']
@@ -109,26 +117,51 @@ class S2DR4Worker(QThread):
                                     filename = f"{name_part}_lon{lon:.4f}_lat{lat:.4f}{ext}"
                             
                             out_path = os.path.join(self.output_dir, filename)
+                            downloaded = 0
                             with open(out_path, 'wb') as f:
                                 for chunk in dl_resp.iter_content(chunk_size=1024*1024):
                                     if chunk:
                                         f.write(chunk)
+                                        downloaded += len(chunk)
                             
+                            if content_len > 0 and downloaded < content_len:
+                                failed_count += 1
+                                last_error_msg = f"Download terputus di tengah ({downloaded // (1024*1024)}MB dari {content_len // (1024*1024)}MB). Gunakan band TCI agar ringan."
+                                QgsMessageLog.logMessage(last_error_msg, 'S2DR4', Qgis.Warning)
+                                continue
+                            
+                            success_count += 1
                             self.feature_done.emit(filename, out_path)
                         else:
+                            failed_count += 1
+                            last_error_msg = f"Gagal download file TIF (HTTP {dl_resp.status_code})"
                             QgsMessageLog.logMessage(f"Titik {i+1} Gagal Download. Kode: {dl_resp.status_code}", 'S2DR4', Qgis.Warning)
                     else:
+                        failed_count += 1
+                        last_error_msg = f"Gagal antre ke server (HTTP {response.status_code})"
                         QgsMessageLog.logMessage(f"Titik {i+1} Gagal Antre. Kode: {response.status_code}", 'S2DR4', Qgis.Warning)
                 except Exception as e:
+                    failed_count += 1
+                    last_error_msg = str(e)
                     QgsMessageLog.logMessage(f"Request Error Titik {i+1}: {str(e)}", 'S2DR4', Qgis.Critical)
             
             if self.is_running:
-                self.progress_update.emit(100, "Semua titik selesai diproses.")
-                self.finished.emit(True, "Pemrosesan batch selesai!")
+                if success_count > 0:
+                    self.progress_update.emit(100, f"Selesai! {success_count} titik berhasil diunduh.")
+                    msg = f"Pemrosesan selesai! {success_count} file TIF berhasil diunduh dan ditambahkan ke kanvas QGIS."
+                    if failed_count > 0:
+                        msg += f"\n\nCatatan: {failed_count} titik gagal diproses (Alasan terakhir: {last_error_msg})."
+                    self.finished.emit(True, msg)
+                else:
+                    self.progress_update.emit(100, "Gagal memproses titik.")
+                    err_detail = last_error_msg if last_error_msg else "Tidak ada citra TIF yang dihasilkan oleh server."
+                    if "SimpleNamespace" in err_detail or "job_id" in err_detail or "401" in err_detail:
+                        err_detail = "Autentikasi Akun Gamma Earth GAGAL (Status 401 Unauthorized).\nAPI Key (GE_API_KEY) belum terpasang di Colab Secrets atau kuota akun 20 scene habis."
+                    self.finished.emit(False, f"Gagal memproses citra satelit S2DR4!\n\nPenyebab:\n{err_detail}\n\nSolusi:\n1. Buka Colab -> Menu Secrets (ikon kunci 🔑) -> Tambah GE_API_KEY & aktifkan toggle 'Notebook access'.\n2. Jika kuota 20 scene habis, daftar akun baru di https://app.gamma.earth/register.\n3. Pastikan format tanggal YYYY-MM-DD lengkap (misal: 2025-07-20).")
                 
         except Exception as e:
             err_msg = traceback.format_exc()
-            self.finished.emit(False, f"Terjadi kesalahan internal:\\n{str(e)}")
+            self.finished.emit(False, f"Terjadi kesalahan internal:\n{str(e)}")
             QgsMessageLog.logMessage(err_msg, 'S2DR4', Qgis.Critical)
 
     def stop(self):
@@ -164,17 +197,27 @@ class S2DR4ConnectorDialog(QDialog, FORM_CLASS):
         out_dir = self.input_outdir.text().strip()
         layer_id = self.combo_layer.currentData()
         
-        band_selection = self.combo_band.currentText()
+        # Pengecekan aman keberadaan combo_band
         band = "TCI"
-        if "MS" in band_selection:
-            band = "MS"
-        elif "NDVI" in band_selection:
-            band = "NDVI"
-        elif "IRP" in band_selection:
-            band = "IRP"
+        if hasattr(self, 'combo_band'):
+            band_selection = self.combo_band.currentText()
+            if "MS" in band_selection:
+                band = "MS"
+            elif "NDVI" in band_selection:
+                band = "NDVI"
+            elif "IRP" in band_selection:
+                band = "IRP"
         
         if not api_url or not date_str or not out_dir or not layer_id:
             QMessageBox.warning(self, "Peringatan", "Semua kolom harus diisi!")
+            return
+            
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
+            QMessageBox.warning(self, "Format Tanggal Salah", 
+                                f"Format tanggal '{date_str}' tidak valid!\n\n"
+                                "Wajib menggunakan format YYYY-MM-DD lengkap dengan tanggal hari.\n"
+                                "Contoh yang benar: 2025-07-20 atau 2024-08-17.\n"
+                                "(Jangan hanya memasukkan tahun dan bulan seperti 2026-10)")
             return
             
         layer = QgsProject.instance().mapLayer(layer_id)
@@ -201,9 +244,15 @@ class S2DR4ConnectorDialog(QDialog, FORM_CLASS):
         layer = QgsRasterLayer(file_path, title)
         if layer.isValid():
             QgsProject.instance().addMapLayer(layer)
+            if hasattr(self, 'iface') and self.iface:
+                self.iface.mapCanvas().refresh()
             QgsMessageLog.logMessage(f"Berhasil memuat: {title}", 'S2DR4', Qgis.Success)
         else:
             QgsMessageLog.logMessage(f"Gagal memuat raster: {file_path}", 'S2DR4', Qgis.Critical)
+            QMessageBox.warning(self, "Peringatan Raster", 
+                                f"File raster tersimpan di:\n{file_path}\n\n"
+                                "Namun gagal dimuat otomatis ke kanvas QGIS karena file tidak lengkap atau korup saat download.\n\n"
+                                "Solusi: Gunakan pilihan Band 'TCI (True Color RGB - Cepat)' agar ukuran file kecil (~15MB) dan tidak terputus di Cloudflare.")
 
     def on_finished(self, success, message):
         self.btn_process.setEnabled(True)

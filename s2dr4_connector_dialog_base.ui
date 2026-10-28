@@ -53,6 +53,37 @@
     <widget class="QComboBox" name="combo_layer"/>
    </item>
    <item>
+    <widget class="QLabel" name="label_band">
+     <property name="text">
+      <string>Pilih Jenis Output (Band):</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="combo_band">
+     <item>
+      <property name="text">
+       <string>TCI (True Color RGB - Cepat)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>MS (Multi-Spectral 10-Band - 200MB+)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>NDVI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>IRP</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="label_outdir">
      <property name="text">
       <string>Folder Output TIF:</string>

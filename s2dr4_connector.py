@@ -93,6 +93,7 @@ class S2DR4Connector:
         if self.first_start == True:
             self.first_start = False
             self.dialog = S2DR4ConnectorDialog(self.iface.mainWindow())
+            self.dialog.iface = self.iface
             
         self.dialog.refresh_layers()
         self.dialog.show()
